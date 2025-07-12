@@ -7,10 +7,7 @@ RUN corepack enable && corepack prepare yarn@4.3.1 --activate
 
 FROM base AS deps
 
-COPY package.json yarn.lock* ./
-COPY .yarnrc.yml ./
-COPY packages/api/package.json ./packages/api/
-COPY packages/types/package.json ./packages/types/
+COPY . .
 
 RUN yarn install --immutable --inline-builds
 
@@ -31,12 +28,11 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/packages/api/dist ./dist
 COPY --from=builder /app/packages/api/package.json ./package.json
 COPY --from=builder /app/packages/types/dist ./node_modules/@aipackr/types/dist
 COPY --from=builder /app/packages/types/package.json ./node_modules/@aipackr/types/package.json
-
-COPY --from=deps /app/node_modules ./node_modules
 
 USER nestjs
 

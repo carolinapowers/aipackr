@@ -15,10 +15,7 @@ services:
     depends_on:
       - postgres
       - redis
-    volumes:
-      - ./packages/api:/app
-      - /app/node_modules
-    command: yarn dev
+    command: yarn start:prod
 
   postgres:
     image: postgres:16-alpine
@@ -48,11 +45,7 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:3001
     depends_on:
       - api
-    volumes:
-      - ./packages/web:/app
-      - /app/node_modules
-      - /app/.next
-    command: yarn dev
+    command: node packages/web/server.js
 
 volumes:
   postgres_data:
