@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://aipackr:password@postgres:5432/aipackr
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./packages/api:/app
+      - /app/node_modules
+    command: yarn dev
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=aipackr
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=aipackr
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - api
+    volumes:
+      - ./packages/web:/app
+      - /app/node_modules
+      - /app/.next
+    command: yarn dev
+
+volumes:
+  postgres_data:
+  redis_data:
