@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  trips       Trip[]
+  clothing    ClothingItem[]
+  preferences UserPreferences?
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  defaultBagSize        String
+  stylePreferences      String[]
+  allergies             String[]
+  dietaryRestrictions   String[]
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model Trip {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  bagSize     String
+  status      String   @default("planning")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destinations TripDestination[]
+  activities   TripActivity[]
+  recommendations PackingRecommendation[]
+
+  @@map("trips")
+}
+
+model Destination {
+  id          String  @id @default(cuid())
+  name        String
+  country     String
+  latitude    Float
+  longitude   Float
+  timezone    String
+  
+  trips TripDestination[]
+
+  @@map("destinations")
+}
+
+model TripDestination {
+  tripId        String
+  destinationId String
+  
+  trip        Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@id([tripId, destinationId])
+  @@map("trip_destinations")
+}
+
+model Activity {
+  id             String @id @default(cuid())
+  name           String
+  type           String
+  description    String?
+  dressCode      String?
+  formalityLevel Int
+  
+  trips TripActivity[]
+
+  @@map("activities")
+}
+
+model TripActivity {
+  tripId     String
+  activityId String
+  
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@id([tripId, activityId])
+  @@map("trip_activities")
+}
+
+model ClothingItem {
+  id                 String   @id @default(cuid())
+  userId             String
+  name               String
+  category           String
+  subcategory        String
+  color              String
+  brand              String?
+  imageUrl           String
+  tags               String[]
+  weatherSuitability String[]
+  formalityLevel     Int
+  createdAt          DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("clothing_items")
+}
+
+model PackingRecommendation {
+  id               String   @id @default(cuid())
+  tripId           String
+  dailyOutfits     Json
+  totalItems       Json
+  bagUtilization   Float
+  culturalNotes    String[]
+  weatherWarnings  String[]
+  generatedAt      DateTime @default(now())
+  
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("packing_recommendations")
+}
