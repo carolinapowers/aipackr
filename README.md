@@ -83,3 +83,7 @@ packages/web/src/
 - Create basic API endpoints for trips and users
 - Integrate weather APIs
 - Set up AWS S3 for image uploads
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
