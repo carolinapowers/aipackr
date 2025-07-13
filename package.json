@@ -12,11 +12,17 @@
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces run lint",
     "typecheck": "yarn workspaces run typecheck",
-    "clean": "yarn workspaces run clean"
+    "clean": "yarn workspaces run clean",
+    "dev:db": "docker compose up postgres redis",
+    "dev:api": "yarn workspace @aipackr/api dev",
+    "dev:web": "yarn workspace @aipackr/web dev",
+    "dev:hybrid": "concurrently \"yarn dev:db\" \"yarn dev:api\" \"yarn dev:web\"",
+    "prod": "docker compose up --build"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "concurrently": "^8.2.2"
   },
   "engines": {
     "node": ">=22.0.0",
